@@ -13,3 +13,13 @@ Create the MySQL Layer, and Copy Your Code to the Lambda Function
 5. Deploy and test your code.
 6. Go back to your index.js tab, undo the code change (Ctrl+Z or Cmd+Z) to get it back to the original code you pasted in, and deploy and test your code again.
 Run Progress Check
+Create a Secret in Secrets Manager
+
+1. Use the Secrets Manager console to create a secret (User name = username, initial password = password) and enable automatic credential rotation. Name the secret RDScredentials and your rotation function rotateRDS.
+2. Update index.js using the following code, replacing the <RDS Endpoint> placeholder with your own RDS endpoint:var mysql = require('mysql'); var AWS = require('aws-sdk'), region = "us-east-1", secretName = "RDScredentials", secret, decodedBinarySecret; var client = new AWS.SecretsManager({ region: "us-east-1" }); exports.handler = (event, context, callback) => { client.getSecretValue({SecretId: secretName}, function(err, data) { if (err) { console.log(err); } else { // Decrypts secret using the associated KMS CMK. // Depending on whether the secret is a string or binary, one of these fields will be populated. if ('SecretString' in data) { secret = data.SecretString; } else { let buff = new Buffer(data.SecretBinary, 'base64'); decodedBinarySecret = buff.toString('ascii'); } } var parse = JSON.parse(secret); var password = parse.password; var connection = mysql.createConnection({ host: "<RDS Endpoint>", user: "username", password: password, database: "example", }); connection.query('show tables', function (error, results, fields) { if (error) { connection.destroy(); throw error; } else { // connected! console.log("Query result:"); console.log(results); callback(error, results); connection.end(function (err) { callback(err, results);}); } }); }); };  
+Run Progress Check
+Skip
+
+Test New Code
+
+Using the code provided, test the connection to the RDS database from Lambda using the Secrets Manager API to obtain the authentication credentialsUpdate

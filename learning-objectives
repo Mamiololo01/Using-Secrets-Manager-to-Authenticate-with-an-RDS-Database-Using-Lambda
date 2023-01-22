@@ -1,0 +1,15 @@
+Create a Lambda Function
+
+Create a Lambda function and join it to the provided VPC and the 2 public subnets. Name your function testRDS. Update the function timeout setting to 6 seconds.
+Run Progress Check
+
+
+Create the MySQL Layer, and Copy Your Code to the Lambda Function
+
+1. Create a custom mysql layer for Node.js 14.x, using the MySQL Library Zip file, and add it to your testRDS function.
+2. Copy and paste the following code in your index.js tab, replacing the <RDS Endpoint> placeholder with your own RDS endpoint: var mysql = require('mysql'); exports.handler = (event, context, callback) => { var connection = mysql.createConnection({ host: "<RDS Endpoint>", user: "username", password: "password", database: "example", }); connection.query('show tables', function (error, results, fields) { if (error) { connection.destroy(); throw error; } else { // connected! console.log("Query result:"); console.log(results); callback(error, results); connection.end(function (err) { callback(err, results);}); } }); };  
+3. Deploy and test your code.
+4. Go back to your index.js tab and replace the connection.query line with the following string: connection.query('CREATE TABLE pet (name VARCHAR(20), species VARCHAR(20))',function (error, results, fields) {  
+5. Deploy and test your code.
+6. Go back to your index.js tab, undo the code change (Ctrl+Z or Cmd+Z) to get it back to the original code you pasted in, and deploy and test your code again.
+Run Progress Check
